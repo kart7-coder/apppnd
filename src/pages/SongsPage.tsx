@@ -9,6 +9,14 @@ function norm(s: string) {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 }
 
+const ART = [
+  'linear-gradient(135deg,#ffc46b,#ff5a3c)',
+  'linear-gradient(135deg,#7cf3dd,#2a9df4)',
+  'linear-gradient(135deg,#c3b6ff,#7b5cff)',
+  'linear-gradient(135deg,#ffb3d1,#ff5c8a)',
+  'linear-gradient(135deg,#d6ff8a,#3ee39b)',
+]
+
 export function SongsPage() {
   const [q, setQ] = useState('')
   const [cat, setCat] = useState<Song['category'] | 'fav' | ''>('')
@@ -29,12 +37,16 @@ export function SongsPage() {
 
   return (
     <div className="page">
-      <h1>Músicas</h1>
+      <header className="page-head">
+        <span className="eyebrow">{ALL_SONGS.length} músicas</span>
+        <h1>Escolha uma música</h1>
+        <p className="lead">Comece pelas fáceis (●○○). Elas usam poucos acordes.</p>
+      </header>
       <div className="search">
         <Icon name="search" />
-        <input placeholder="Buscar por título, artista ou nº da Harpa" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar música" />
+        <input placeholder="Buscar pelo nome ou nº da Harpa" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar música" />
       </div>
-      <div className="chips scroll" role="group" aria-label="Categoria">
+      <div className="chips scroll" role="group" aria-label="Filtros">
         <button className={`chip ${cat === '' ? 'on' : ''}`} onClick={() => setCat('')}>
           Todas
         </button>
@@ -44,42 +56,43 @@ export function SongsPage() {
           </button>
         ))}
         <button className={`chip ${cat === 'fav' ? 'on' : ''}`} onClick={() => setCat('fav')}>
-          ♥ Favoritas
+          ♥ Salvas
         </button>
-        <select className="chip" value={diff} onChange={(e) => setDiff(Number(e.target.value))} aria-label="Dificuldade">
-          <option value={0}>Qualquer nível</option>
-          <option value={1}>Iniciante</option>
-          <option value={2}>Intermediário</option>
-          <option value={3}>Avançado</option>
-        </select>
+        {[1, 2].map((d) => (
+          <button key={d} className={`chip ${diff === d ? 'on' : ''}`} onClick={() => setDiff(diff === d ? 0 : d)}>
+            {DIFFICULTY_LABEL[d as 1 | 2]}
+          </button>
+        ))}
       </div>
 
-      <div className="song-list">
-        {list.map((s) => {
+      <div className="song-grid">
+        {list.map((s, i) => {
           const pr = progress[s.id]
           return (
-            <Link key={s.id} to={`/musicas/${s.id}`} className="song-row">
-              <span className="song-num">{s.harpa ? s.harpa : s.key}</span>
-              <span className="song-info">
-                <b>{s.title}</b>
-                <small>
-                  {s.harpa ? `Harpa Cristã ${s.harpa}` : s.artist} · {DIFFICULTY_LABEL[s.difficulty]}
-                </small>
-                <span className="mini-chords">
-                  {songChords(s).slice(0, 6).map((c) => (
-                    <i key={c}>{c}</i>
-                  ))}
-                </span>
+            <Link key={s.id} to={`/musicas/${s.id}`} className="card card-hover song-card">
+              <span className="song-art" style={{ background: ART[i % ART.length] }}>
+                {s.harpa ?? s.title.slice(0, 1)}
               </span>
-              <span className="song-meta">
-                {favs.isFav(s.id) && <span className="fav-dot" aria-label="Favorita">♥</span>}
-                {pr?.completions ? <span className="badge ok">✓ {Math.round((pr.bestSpeed ?? 0) * 100)}%</span> : null}
+              <b>{s.title}</b>
+              <small>{s.harpa ? `Harpa Cristã ${s.harpa}` : s.artist}</small>
+              <span className="level" aria-label={`Nível ${DIFFICULTY_LABEL[s.difficulty]}`}>
+                {[1, 2, 3].map((n) => (
+                  <i key={n} className={n <= s.difficulty ? 'on' : ''} />
+                ))}
+              </span>
+              <span className="mini-chords">
+                {songChords(s).slice(0, 5).map((c) => (
+                  <i key={c}>{c}</i>
+                ))}
+              </span>
+              <span className="corner">
+                {pr?.completions ? <span className="badge ok">✓</span> : favs.isFav(s.id) ? <span className="fav-dot">♥</span> : null}
               </span>
             </Link>
           )
         })}
-        {!list.length && <p className="muted">Nenhuma música encontrada.</p>}
       </div>
+      {!list.length && <p className="muted">Nenhuma música encontrada.</p>}
     </div>
   )
 }

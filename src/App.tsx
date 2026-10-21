@@ -13,10 +13,8 @@ import { ChordsPage } from './pages/ChordsPage'
 import { MethodPage, MethodTonePage, MethodPlayPage } from './pages/MethodPages'
 import { TrainerPage } from './pages/TrainerPage'
 import { AccountPage } from './pages/AccountPage'
-import { OfferPage } from './pages/OfferPage'
 
 const TunerPage = lazy(() => import('./pages/TunerPage'))
-const AdminPage = lazy(() => import('./pages/AdminPage'))
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { loading, user, recovering } = useAuth()
@@ -29,44 +27,38 @@ function RequireAuth({ children }: { children: ReactNode }) {
 
 const NAV = [
   { to: '/', icon: 'home', label: 'Início', end: true },
-  { to: '/musicas', icon: 'music', label: 'Tocar' },
+  { to: '/musicas', icon: 'music', label: 'Músicas' },
   { to: '/acordes', icon: 'grid', label: 'Acordes' },
   { to: '/afinador', icon: 'tuner', label: 'Afinador' },
-  { to: '/conta', icon: 'user', label: 'Conta' },
+  { to: '/conta', icon: 'user', label: 'Perfil' },
 ]
 
 function Shell({ children }: { children: ReactNode }) {
-  const { profile } = useAuth()
   return (
     <div className="shell">
       <nav className="nav" aria-label="Principal">
-        <div className="nav-brand">
+        <NavLink to="/" className="nav-brand">
           <img src="/icon-192.png" alt="" width={34} height={34} />
-          <span>
-            <small>Método</small>
-            <b>Acordes Exclusivos</b>
-          </span>
-        </div>
-        {NAV.map((n) => (
+          <b>Acordes Exclusivos</b>
+        </NavLink>
+        {NAV.slice(0, 4).map((n) => (
           <NavLink key={n.to} to={n.to} end={n.end} className="nav-item">
             <Icon name={n.icon} />
             <span>{n.label}</span>
           </NavLink>
         ))}
-        <NavLink to="/metodo" className="nav-item desktop-only">
+        <NavLink to="/metodo" className="nav-item nav-desktop">
           <Icon name="book" />
           <span>Método</span>
         </NavLink>
-        <NavLink to="/treino" className="nav-item desktop-only">
+        <NavLink to="/treino" className="nav-item nav-desktop">
           <Icon name="bolt" />
-          <span>Treino de troca</span>
+          <span>Treino</span>
         </NavLink>
-        {profile?.is_admin && (
-          <NavLink to="/admin" className="nav-item desktop-only">
-            <Icon name="shield" />
-            <span>Admin</span>
-          </NavLink>
-        )}
+        <NavLink to={NAV[4].to} className="nav-item">
+          <Icon name={NAV[4].icon} />
+          <span>{NAV[4].label}</span>
+        </NavLink>
       </nav>
       <main className="main">{children}</main>
     </div>
@@ -109,8 +101,6 @@ export default function App() {
             <Route path="/treino" element={<Protected><TrainerPage /></Protected>} />
             <Route path="/afinador" element={<Protected><TunerPage /></Protected>} />
             <Route path="/conta" element={<Protected><AccountPage /></Protected>} />
-            <Route path="/oferta/:product" element={<Protected><OfferPage /></Protected>} />
-            <Route path="/admin" element={<Protected><AdminPage /></Protected>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

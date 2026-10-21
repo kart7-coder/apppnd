@@ -2,17 +2,16 @@ import { useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { getSong, songChords, songShape, songTimeline } from '../content'
 import { ChordDiagram } from '../components/ChordDiagram'
+import { ChordLegend } from '../components/ChordLegend'
 import { Icon } from '../components/Icon'
 import { describeChange, describeShape } from '../music/explain'
 import { strumChord } from '../engine/audio'
-import { useAuth, hasProduct } from '../lib/auth'
 
 type Step = { kind: 'intro' } | { kind: 'chord'; chord: string } | { kind: 'change'; from: string; to: string } | { kind: 'done' }
 
 export function LearnPage() {
   const { id = '' } = useParams()
   const song = getSong(id)
-  const auth = useAuth()
   const [i, setI] = useState(0)
 
   const steps = useMemo<Step[]>(() => {
@@ -35,9 +34,9 @@ export function LearnPage() {
   }, [song])
 
   if (!song) return <Navigate to="/musicas" replace />
-  if (!hasProduct(auth, song.product)) return <Navigate to={`/musicas/${id}`} replace />
   const step = steps[i]
   const chords = songChords(song)
+  const chordSteps = steps.filter((s) => s.kind === 'chord').length
 
   return (
     <div className="page learn">
@@ -51,77 +50,91 @@ export function LearnPage() {
       </div>
 
       {step.kind === 'intro' && (
-        <section className="learn-card">
-          <p className="eyebrow">Aprender passo a passo</p>
+        <section className="card learn-card">
+          <span className="eyebrow">Aprender do zero</span>
           <h1>{song.title}</h1>
-          <p>
-            Esta música usa <b>{chords.length} acordes</b>. Primeiro você aprende cada um. Depois treina as trocas entre eles e, no fim, toca a música inteira.
+          <p className="lead">
+            Esta música usa <b>{chords.length} acordes</b>. Acorde é o jeito de posicionar os dedos para tocar várias cordas juntas. Você vai aprender um por vez, depois
+            treinar a troca entre eles e, no fim, tocar a música inteira.
           </p>
           <div className="chord-row">
             {chords.map((c) => (
               <ChordDiagram key={c} shape={songShape(song, c)} name={c} size={96} />
             ))}
           </div>
-          <p className="muted small">Dica: afine o violão antes. <Link to="/afinador">Abrir afinador</Link></p>
+          <ChordLegend />
+          <p className="muted small">
+            Dica: afine o violão antes de começar. <Link to="/afinador">Abrir o afinador</Link>
+          </p>
         </section>
       )}
 
-      {step.kind === 'chord' && (() => {
-        const shape = songShape(song, step.chord)
-        return (
-          <section className="learn-card">
-            <p className="eyebrow">Acorde</p>
-            <h1>{step.chord}</h1>
-            <div className="learn-chord">
-              <ChordDiagram shape={shape} name={step.chord} size={190} />
-              <ul className="instructions">
-                {shape ? describeShape(shape).map((t) => <li key={t}>{t}</li>) : <li>Diagrama ainda não cadastrado.</li>}
-                {shape?.note && <li className="warn">{shape.note}</li>}
-              </ul>
-            </div>
-            {shape && (
-              <button className="btn" onClick={() => strumChord(shape)}>
-                <Icon name="sound" /> Ouvir como soa
-              </button>
-            )}
-            <p className="muted small">Toque corda por corda e verifique se nenhuma está abafada.</p>
-          </section>
-        )
-      })()}
+      {step.kind === 'chord' &&
+        (() => {
+          const shape = songShape(song, step.chord)
+          const n = steps.indexOf(step)
+          return (
+            <section className="card learn-card">
+              <span className="eyebrow">
+                Acorde {n} de {chordSteps}
+              </span>
+              <h1>{step.chord}</h1>
+              <div className="learn-chord">
+                <ChordDiagram shape={shape} name={step.chord} size={200} />
+                <ul className="instructions">
+                  {shape ? describeShape(shape).map((t) => <li key={t}>{t}</li>) : <li>Desenho ainda não cadastrado.</li>}
+                  {shape?.note && <li className="warn">{shape.note}</li>}
+                </ul>
+              </div>
+              {shape && (
+                <button className="btn" onClick={() => strumChord(shape)}>
+                  <Icon name="sound" /> Ouvir como deve soar
+                </button>
+              )}
+              <p className="muted small">Toque corda por corda. Se alguma sair abafada, aperte com a ponta do dedo, bem perto do ferrinho.</p>
+            </section>
+          )
+        })()}
 
-      {step.kind === 'change' && (() => {
-        const a = songShape(song, step.from)
-        const b = songShape(song, step.to)
-        return (
-          <section className="learn-card">
-            <p className="eyebrow">Troca de acorde</p>
-            <h1>
-              {step.from} → {step.to}
-            </h1>
-            <div className="change-pair">
-              <ChordDiagram shape={a} name={step.from} size={130} />
-              <span className="arrow">→</span>
-              <ChordDiagram shape={b} name={step.to} size={130} />
-            </div>
-            <ul className="instructions">{a && b && describeChange(a, b).map((t) => <li key={t}>{t}</li>)}</ul>
-            <Link className="btn btn-primary" to={`/treino?acordes=${encodeURIComponent(`${step.from},${step.to}`)}&volta=${encodeURIComponent(`/musicas/${song.id}/aprender`)}`}>
-              <Icon name="bolt" /> Treinar esta troca
-            </Link>
-          </section>
-        )
-      })()}
+      {step.kind === 'change' &&
+        (() => {
+          const a = songShape(song, step.from)
+          const b = songShape(song, step.to)
+          return (
+            <section className="card learn-card">
+              <span className="eyebrow">Treine a troca</span>
+              <h1>
+                {step.from} → {step.to}
+              </h1>
+              <p className="lead">Na música, você vai pular de um para o outro. Treine até conseguir sem olhar muito para a mão.</p>
+              <div className="change-pair">
+                <ChordDiagram shape={a} name={step.from} size={130} />
+                <span className="arrow">→</span>
+                <ChordDiagram shape={b} name={step.to} size={130} />
+              </div>
+              <ul className="instructions">{a && b && describeChange(a, b).map((t) => <li key={t}>{t}</li>)}</ul>
+              <p />
+              <Link
+                className="btn btn-primary"
+                to={`/treino?acordes=${encodeURIComponent(`${step.from},${step.to}`)}&volta=${encodeURIComponent(`/musicas/${song.id}/aprender`)}`}
+              >
+                <Icon name="bolt" /> Treinar esta troca no ritmo
+              </Link>
+            </section>
+          )
+        })()}
 
       {step.kind === 'done' && (
-        <section className="learn-card">
-          <p className="eyebrow">Pronto!</p>
-          <h1>Agora toque a música</h1>
-          <p>Comece na prática guiada a 60% e vá subindo a velocidade até 100%.</p>
-          <div className="cta-row">
+        <section className="card learn-card">
+          <span className="eyebrow">Você conseguiu 🎉</span>
+          <h1>Agora é tocar a música</h1>
+          <p className="lead">Comece no “Treinar devagar”. Quando ficar fácil, aumente a velocidade até chegar em 100%.</p>
+          <div className="cta-col">
             <Link className="btn btn-primary" to={`/tocar/${song.id}?modo=pratica`}>
-              Prática guiada
+              Treinar devagar
             </Link>
             <Link className="btn" to={`/tocar/${song.id}?modo=jogo`}>
-              Modo jogo
+              Tocar junto
             </Link>
           </div>
         </section>
@@ -132,7 +145,7 @@ export function LearnPage() {
           Voltar
         </button>
         <button className="btn btn-primary" disabled={i === steps.length - 1} onClick={() => setI(i + 1)}>
-          Avançar
+          {i === 0 ? 'Começar' : 'Próximo'}
         </button>
       </div>
     </div>

@@ -2,10 +2,10 @@ import { useEffect } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { getSong, songChords, songShape, songTimeline, DIFFICULTY_LABEL, CATEGORY_LABEL } from '../content'
 import { ChordDiagram } from '../components/ChordDiagram'
+import { ChordLegend } from '../components/ChordLegend'
 import { Icon } from '../components/Icon'
-import { useAuth, hasProduct } from '../lib/auth'
+import { useAuth } from '../lib/auth'
 import { logHistory, useFavorites, useProgress } from '../lib/userData'
-import { Locked } from '../components/OfferCard'
 import { LyricLine } from '../components/Player'
 import { strumChord } from '../engine/audio'
 
@@ -21,74 +21,73 @@ export function SongDetailPage() {
   }, [song, auth.user])
 
   if (!song) return <Navigate to="/musicas" replace />
-  if (!hasProduct(auth, song.product)) return <div className="page"><Locked product={song.product!} /></div>
 
   const chords = songChords(song)
   const tl = songTimeline(song)
-  const minutes = Math.round((tl.totalBeats * 60) / song.bpm / 60)
+  const minutes = Math.max(1, Math.round((tl.totalBeats * 60) / song.bpm / 60))
 
   return (
     <div className="page">
       <Link to="/musicas" className="back-link">
         <Icon name="back" size={18} /> Músicas
       </Link>
-      <header className="detail-head">
-        <div>
-          <p className="eyebrow">{song.harpa ? `Harpa Cristã ${song.harpa}` : CATEGORY_LABEL[song.category]}</p>
-          <h1>{song.title}</h1>
-          <p className="muted">
-            {song.artist ? `${song.artist} · ` : ''}Tom {song.key} · {DIFFICULTY_LABEL[song.difficulty]} · ~{minutes} min
-          </p>
-        </div>
-        <button className={`icon-btn ${favs.isFav(song.id) ? 'on' : ''}`} onClick={() => favs.toggle(song.id)} aria-pressed={favs.isFav(song.id)} aria-label="Favoritar">
+      <header className="detail-hero page-head">
+        <span className="eyebrow">{song.harpa ? `Harpa Cristã ${song.harpa}` : CATEGORY_LABEL[song.category]}</span>
+        <h1>{song.title}</h1>
+        <p className="lead">
+          {song.artist ? `${song.artist} · ` : ''}
+          {chords.length} acordes · {DIFFICULTY_LABEL[song.difficulty]} · cerca de {minutes} min
+        </p>
+        <button className={`icon-btn ${favs.isFav(song.id) ? 'on' : ''}`} onClick={() => favs.toggle(song.id)} aria-pressed={favs.isFav(song.id)} aria-label="Salvar nas favoritas">
           <Icon name="heart" />
         </button>
       </header>
 
-      <div className="cta-row">
-        <Link className="btn btn-primary" to={`/tocar/${song.id}?modo=jogo`}>
-          <Icon name="play" /> Tocar (modo jogo)
-        </Link>
-        <Link className="btn" to={`/tocar/${song.id}?modo=pratica`}>
-          Prática guiada
-        </Link>
-        <Link className="btn" to={`/musicas/${song.id}/aprender`}>
-          Aprender passo a passo
-        </Link>
-      </div>
-
       {pr?.completions ? (
         <p className="badge ok">
-          Você já completou {pr.completions}x · melhor velocidade {Math.round((pr.bestSpeed ?? 0) * 100)}%
+          ✓ Você já tocou {pr.completions}x · melhor velocidade {Math.round((pr.bestSpeed ?? 0) * 100)}%
         </p>
       ) : null}
 
-      <div className="note">
-        <Icon name="sound" size={18} />
-        <span>
-          Ainda não temos a gravação desta música. No modo Tocar, ela segue o <b>metrônomo</b>, e o "violão guia" toca o acorde de cada compasso. As trocas são uma
-          estimativa a partir da cifra.
-        </span>
+      <div className="cta-col">
+        <Link className="btn btn-primary" to={`/musicas/${song.id}/aprender`}>
+          Aprender do zero
+          <small>Cada acorde e cada troca, passo a passo</small>
+        </Link>
+        <Link className="btn" to={`/tocar/${song.id}?modo=pratica`}>
+          Treinar devagar
+          <small>Começa em 60% da velocidade</small>
+        </Link>
+        <Link className="btn" to={`/tocar/${song.id}?modo=jogo`}>
+          Tocar junto
+          <small>Escolha o nível: fácil, médio ou normal</small>
+        </Link>
       </div>
 
       <section>
-        <h2>Acordes da música</h2>
-        <p className="muted small">Toque no acorde para ouvir.</p>
-        <div className="chord-row">
+        <div className="section-head">
+          <h2>Os acordes desta música</h2>
+          <p>Toque no desenho para ouvir como soa.</p>
+        </div>
+        <div className="chord-row wrap">
           {chords.map((c) => {
             const shape = songShape(song, c)
             return (
               <button key={c} className="chord-tile" onClick={() => shape && strumChord(shape)} aria-label={`Ouvir ${c}`}>
-                <ChordDiagram shape={shape} name={c} size={112} />
+                <ChordDiagram shape={shape} name={c} size={chords.length <= 3 ? 96 : 84} />
               </button>
             )
           })}
         </div>
+        <ChordLegend />
       </section>
 
       <section>
-        <h2>Cifra</h2>
-        <div className="sheet">
+        <div className="section-head">
+          <h2>Letra com os acordes</h2>
+          <p>O nome em laranja mostra em que palavra trocar de acorde.</p>
+        </div>
+        <div className="card sheet">
           {song.sections.map((sec) => (
             <div key={sec.name} className="sheet-section">
               {sec.name && <h3>{sec.name}</h3>}
@@ -98,13 +97,16 @@ export function SongDetailPage() {
             </div>
           ))}
         </div>
-        {song.arrangement && <p className="muted small">Ordem: {song.arrangement.join(' → ')}</p>}
+        {song.arrangement && <p className="muted small">Ordem para tocar: {song.arrangement.join(' → ')}</p>}
+        <div className="note small">
+          <Icon name="sound" size={18} />
+          <span>Ainda não temos a gravação desta música. No modo Tocar, o ritmo vem do metrônomo (um "tic" a cada tempo) e o app toca o acorde para você acompanhar.</span>
+        </div>
         {song.reviewNotes?.map((n) => (
-          <p key={n} className="note warn small">
-            Revisão: {n}
+          <p key={n} className="muted small">
+            Observação: {n}
           </p>
         ))}
-        <p className="muted small">Fonte: {song.source.file}{song.source.page ? `, p. ${song.source.page}` : ''}</p>
       </section>
     </div>
   )

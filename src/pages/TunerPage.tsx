@@ -106,15 +106,19 @@ export default function TunerPage() {
 
   return (
     <div className="page tuner">
-      <h1>Afinador</h1>
-      <p className="muted">Afinação padrão: Mi · Lá · Ré · Sol · Si · Mi. Toque uma corda solta por vez, perto do celular.</p>
+      <header className="page-head">
+        <span className="eyebrow">Afinador</span>
+        <h1>Deixe o violão no tom certo</h1>
+        <p className="lead">Ative o microfone e toque uma corda por vez, sem apertar nenhuma casa. Gire a tarraxa (a chave na ponta do braço) até o ponteiro ficar verde.</p>
+      </header>
 
-      <div className={`tuner-dial ${inTune ? 'ok' : ''}`} aria-live="polite">
+      <div className={`card tuner-dial ${inTune ? 'ok' : ''}`} aria-live="polite">
         <div className="tuner-note">
           {target ? target.note : '—'}
           <small>{target ? `${target.string}ª corda · ${target.label}` : status === 'listening' ? 'Toque uma corda' : ''}</small>
         </div>
         <div className="tuner-scale" aria-hidden>
+          <span className="arc" />
           <span className="tick zero" />
           <div className="needle" style={{ transform: `translateX(-50%) rotate(${clamped * 0.9}deg)`, opacity: cents == null ? 0.25 : 1 }} />
         </div>
@@ -124,12 +128,17 @@ export default function TunerPage() {
               ? 'Ouvindo…'
               : ''
             : inTune
-              ? 'Afinado ✓'
+              ? 'Perfeito, afinada! ✓'
               : cents < 0
-                ? `Grave (${cents}). Aperte a tarraxa`
-                : `Agudo (+${cents}). Afrouxe a tarraxa`}
+                ? 'Está grave: aperte um pouco a corda'
+                : 'Está aguda: afrouxe um pouco a corda'}
         </div>
-        {heard && <div className="muted small">Ouvindo: {heard.note}{heard.octave} · {freq!.toFixed(1)} Hz</div>}
+        {heard && (
+          <div className="muted small">
+            Nota ouvida: {heard.note}
+            {heard.octave}
+          </div>
+        )}
       </div>
 
       {status !== 'listening' ? (
@@ -143,18 +152,20 @@ export default function TunerPage() {
       )}
       {error && <p className="alert" role="alert">{error}</p>}
 
-      <h2>Corda</h2>
+      <h2>Qual corda você vai afinar?</h2>
+      <p className="muted small">No automático, o app descobre sozinho. A corda 6 é a mais grossa.</p>
       <div className="string-picker" role="group" aria-label="Escolher corda">
         <button className={`chip ${manual == null ? 'on' : ''}`} onClick={() => setManual(null)}>
           Automático
         </button>
         {STANDARD_TUNING.map((s) => (
           <button key={s.string} className={`chip ${manual === s.string ? 'on' : ''}`} onClick={() => setManual(s.string)}>
-            {s.string}ª {s.note}
+            Corda {s.string} ({s.note})
           </button>
         ))}
       </div>
-      <h2>Som de referência</h2>
+      <h2>Ouvir a nota certa</h2>
+      <p className="muted small">Prefere afinar de ouvido? Toque no botão e compare com a sua corda.</p>
       <div className="string-picker">
         {STANDARD_TUNING.map((s) => {
           const frets = ['x', 'x', 'x', 'x', 'x', 'x']
@@ -167,7 +178,7 @@ export default function TunerPage() {
         })}
       </div>
       <p className="muted small">
-        A precisão pode variar com barulho ao redor, com a qualidade do microfone e com cordas muito velhas. O app só usa o microfone enquanto esta tela está aberta.
+        Barulho ao redor e cordas muito velhas atrapalham a leitura. O microfone só fica ligado enquanto esta tela estiver aberta.
       </p>
     </div>
   )

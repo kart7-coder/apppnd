@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { getSong, songShape, songTimeline } from '../content'
 import { Player, type PlayMode } from '../components/Player'
-import { useAuth, hasProduct } from '../lib/auth'
+import { useAuth } from '../lib/auth'
 import { logHistory, saveProgress } from '../lib/userData'
 
 export function PlaySongPage() {
@@ -17,12 +17,12 @@ export function PlaySongPage() {
     if (song && auth.user) logHistory(auth.user.id, 'song', song.id, song.title)
   }, [song, auth.user])
 
-  if (!song || !hasProduct(auth, song.product)) return <Navigate to={`/musicas/${id}`} replace />
+  if (!song) return <Navigate to={`/musicas/${id}`} replace />
 
   return (
     <Player
       title={song.title}
-      subtitle={mode === 'pratica' ? 'Prática guiada' : 'Modo jogo'}
+      subtitle={mode === 'pratica' ? 'Treinar devagar' : 'Tocar junto'}
       timeline={songTimeline(song)}
       bpm={song.bpm}
       sync={song.sync}

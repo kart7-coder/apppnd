@@ -29,7 +29,7 @@ export function TrainerPage() {
         <Player
           key={chords.join() + bars + bpm}
           title={`Treino: ${chords.join(' → ')}`}
-          subtitle={`${bpm} bpm · ${bars === 1 ? '1 compasso' : `${bars} compassos`} por acorde`}
+          subtitle={`${bars === 1 ? '4' : '8'} batidas em cada acorde`}
           timeline={timeline}
           bpm={bpm}
           sync="estimated"
@@ -42,8 +42,11 @@ export function TrainerPage() {
 
   return (
     <div className="page">
-      <h1>Treino de troca</h1>
-      <p className="muted">Escolha de 2 a 4 acordes. O app alterna entre eles no ritmo, e você troca quando o bloco chegar na linha.</p>
+      <header className="page-head">
+        <span className="eyebrow">Treino de troca</span>
+        <h1>Troque de acorde sem travar</h1>
+        <p className="lead">A parte mais difícil do começo é trocar de acorde a tempo. Escolha de 2 a 4 acordes e o app alterna entre eles no ritmo, como um exercício.</p>
+      </header>
       <div className="chips wrap" role="group" aria-label="Acordes">
         {PICKS.map((c) => (
           <button key={c} className={`chip ${chords.includes(c) ? 'on' : ''}`} onClick={() => toggle(c)} aria-pressed={chords.includes(c)}>
@@ -51,6 +54,7 @@ export function TrainerPage() {
           </button>
         ))}
       </div>
+      <p className="muted small">{chords.length < 2 ? 'Escolha pelo menos 2 acordes.' : `Selecionados: ${chords.join(' → ')}`}</p>
       <div className="chord-row">
         {chords.map((c) => (
           <ChordDiagram key={c} shape={bestShape(c)} name={c} size={100} />
@@ -58,20 +62,22 @@ export function TrainerPage() {
       </div>
       <div className="form-row">
         <label>
-          Duração de cada acorde
+          Tempo em cada acorde
           <select value={bars} onChange={(e) => setBars(Number(e.target.value))}>
-            <option value={2}>2 compassos (mais fácil)</option>
-            <option value={1}>1 compasso</option>
+            <option value={2}>8 batidas (mais fácil)</option>
+            <option value={1}>4 batidas</option>
           </select>
         </label>
         <label>
-          Andamento: {bpm} bpm
+          Velocidade: {bpm < 60 ? 'bem devagar' : bpm < 85 ? 'devagar' : bpm < 110 ? 'média' : 'rápida'} ({bpm} batidas por minuto)
           <input type="range" min={40} max={140} step={5} value={bpm} onChange={(e) => setBpm(Number(e.target.value))} />
         </label>
       </div>
-      <button className="btn btn-primary btn-block" disabled={chords.length < 2} onClick={() => setStarted(true)}>
-        Começar treino
-      </button>
+      <div className="narrow center">
+        <button className="btn btn-primary btn-block" disabled={chords.length < 2} onClick={() => setStarted(true)}>
+          Começar treino
+        </button>
+      </div>
     </div>
   )
 }

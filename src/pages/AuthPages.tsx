@@ -6,16 +6,14 @@ import { authErrorPt, useAuth } from '../lib/auth'
 function AuthLayout({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   return (
     <div className="auth">
-      <div className="auth-art" aria-hidden>
-        <div className="auth-strings">
-          {Array.from({ length: 6 }, (_, i) => (
-            <span key={i} />
-          ))}
-        </div>
+      <div className="auth-strings" aria-hidden>
+        {Array.from({ length: 6 }, (_, i) => (
+          <span key={i} />
+        ))}
       </div>
       <div className="auth-card">
         <img src="/icon-192.png" alt="" className="auth-logo" width={64} height={64} />
-        <p className="eyebrow">Método Acordes Exclusivos</p>
+        <span className="eyebrow">Acordes Exclusivos</span>
         <h1>{title}</h1>
         {subtitle && <p className="muted">{subtitle}</p>}
         {children}
@@ -45,7 +43,7 @@ export function LoginPage() {
   }
 
   return (
-    <AuthLayout title="Entrar" subtitle="Aprenda violão tocando as músicas da sua igreja.">
+    <AuthLayout title="Que bom te ver!" subtitle="Aprenda violão tocando os hinos e louvores da sua igreja, mesmo que nunca tenha tocado.">
       <form onSubmit={submit} className="form">
         <label>
           E-mail
@@ -106,7 +104,7 @@ export function SignupPage() {
     )
 
   return (
-    <AuthLayout title="Criar conta" subtitle="É grátis. Seu progresso fica salvo em qualquer aparelho.">
+    <AuthLayout title="Crie sua conta grátis" subtitle="Tudo liberado. Seu progresso fica salvo no celular e no computador.">
       <form onSubmit={submit} className="form">
         <label>
           Nome

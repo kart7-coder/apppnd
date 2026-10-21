@@ -15,7 +15,7 @@ export const CATEGORY_LABEL: Record<Song['category'], string> = {
   exercicio: 'Exercícios',
 }
 
-export const DIFFICULTY_LABEL = { 1: 'Iniciante', 2: 'Intermediário', 3: 'Avançado' } as const
+export const DIFFICULTY_LABEL = { 1: 'Fácil', 2: 'Médio', 3: 'Desafiador' } as const
 
 export function getSong(id: string): Song | undefined {
   return ALL_SONGS.find((s) => s.id === id)

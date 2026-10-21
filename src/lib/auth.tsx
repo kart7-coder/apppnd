@@ -14,7 +14,6 @@ interface AuthState {
   session: Session | null
   user: User | null
   profile: Profile | null
-  products: string[]
   /** Evento PASSWORD_RECOVERY recebido (link "esqueci a senha"). */
   recovering: boolean
   refresh(): Promise<void>
@@ -27,19 +26,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [products, setProducts] = useState<string[]>([])
   const [recovering, setRecovering] = useState(false)
 
   async function loadUserData(s: Session | null) {
     if (!s) {
       setProfile(null)
-      setProducts([])
       return
     }
-    const [p, e] = await Promise.all([
-      supabase.from('profiles').select('id,name,email,is_admin').eq('id', s.user.id).maybeSingle(),
-      supabase.from('entitlements').select('product').eq('user_id', s.user.id).is('revoked_at', null),
-    ])
+    const p = await supabase.from('profiles').select('id,name,email,is_admin').eq('id', s.user.id).maybeSingle()
     setProfile(
       (p.data as Profile | null) ?? {
         id: s.user.id,
@@ -48,7 +42,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         is_admin: false,
       },
     )
-    setProducts(((e.data as { product: string }[] | null) ?? []).map((x) => x.product))
   }
 
   useEffect(() => {
@@ -76,7 +69,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     user: session?.user ?? null,
     profile,
-    products,
     recovering,
     refresh: () => loadUserData(session),
     signOut: async () => {
@@ -91,11 +83,6 @@ export function useAuth(): AuthState {
   const v = useContext(Ctx)
   if (!v) throw new Error('useAuth fora do AuthProvider')
   return v
-}
-
-export function hasProduct(auth: AuthState, product?: string) {
-  if (!product) return true
-  return Boolean(auth.profile?.is_admin) || auth.products.includes(product)
 }
 
 /** Mensagens do Supabase em português. */

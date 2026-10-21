@@ -23,10 +23,17 @@ interface Props {
 
 const LEVELS = [
   { id: 'facil', label: 'Fácil', speed: 0.6 },
-  { id: 'normal', label: 'Normal', speed: 0.8 },
-  { id: 'desafio', label: 'Desafio', speed: 1 },
+  { id: 'medio', label: 'Médio', speed: 0.8 },
+  { id: 'normal', label: 'Normal', speed: 1 },
 ]
-const SPEEDS = [0.5, 0.6, 0.75, 0.9, 1, 1.1]
+const SPEEDS = [
+  { v: 0.5, label: 'Bem devagar' },
+  { v: 0.6, label: 'Devagar' },
+  { v: 0.75, label: 'Quase normal' },
+  { v: 0.9, label: 'Um pouco abaixo' },
+  { v: 1, label: 'Normal' },
+  { v: 1.1, label: 'Rápido' },
+]
 
 function fmt(beats: number, bpm: number, speed: number) {
   const s = Math.max(0, (beats * 60) / (bpm * speed))
@@ -79,7 +86,7 @@ export function Player({ title, subtitle, timeline, bpm, sync, shapeFor, label =
           <span>
             {subtitle}
             {subtitle ? ' · ' : ''}
-            {sync === 'synced' ? 'Sincronizado com áudio' : 'Ritmo pelo metrônomo'}
+            {sync === 'synced' ? 'Com a gravação' : 'No ritmo do metrônomo'}
           </span>
         </div>
         {headerExtra}
@@ -98,19 +105,20 @@ export function Player({ title, subtitle, timeline, bpm, sync, shapeFor, label =
           {countIn > 0 && p.playing && <div className="count-in">{countIn}</div>}
           {!p.playing && !p.ended && (
             <button className="stage-play" onClick={p.play} aria-label="Tocar">
-              <Icon name="play" />
-              <span>{p.beat <= 0 ? 'Começar' : 'Continuar'}</span>
+              <span className="play-ball">
+                <Icon name="play" />
+              </span>
+              <b>{p.beat <= 0 ? 'Começar' : 'Continuar'}</b>
+              {p.beat <= 0 && <small>Vai contar 4, 3, 2, 1. Quando um bloco colorido encostar na linha branca, troque para aquele acorde.</small>}
             </button>
           )}
           {p.ended && (
             <div className="stage-result" role="status">
-              <h3>Música concluída! 🎉</h3>
+              <h2>Você chegou ao fim! 🎉</h2>
               <p>
-                Velocidade: <b>{Math.round(p.speed * 100)}%</b>
+                Você tocou em <b>{Math.round(p.speed * 100)}%</b> da velocidade.
               </p>
-              <p className="muted small">
-                Pontuação por acerto só vai existir quando o app puder ouvir o violão. Por enquanto, o objetivo é chegar a 100% de velocidade.
-              </p>
+              <p className="muted small">{p.speed < 1 ? 'Próximo desafio: tocar um pouco mais rápido.' : 'Velocidade normal: você já toca no ritmo da música!'}</p>
               <div className="row gap">
                 <button className="btn" onClick={() => { p.restart(); p.play() }}>
                   Tocar de novo
@@ -128,14 +136,14 @@ export function Player({ title, subtitle, timeline, bpm, sync, shapeFor, label =
         <aside className="player-side">
           <div className="chord-now">
             <div className="chord-card current">
-              <span className="tag">{preparing ? 'Prepare' : 'Agora'}</span>
+              <span className="tag">{preparing ? 'Prepare a mão' : 'Toque agora'}</span>
               <ChordDiagram shape={cur ? shapeFor(cur.chord) : undefined} name={cur ? label(cur.chord) : '—'} size={150} />
             </div>
             <div className="chord-card next">
               <span className="tag">
-                Próximo{next && p.playing && beatsToNext <= timeline.beatsPerBar ? ` em ${Math.ceil(beatsToNext)}` : ''}
+                {next && p.playing && beatsToNext <= timeline.beatsPerBar ? `Troca em ${Math.ceil(beatsToNext)}` : 'Depois'}
               </span>
-              {next ? <ChordDiagram shape={shapeFor(next.chord)} name={label(next.chord)} size={104} /> : <p className="muted">Fim</p>}
+              {next ? <ChordDiagram shape={shapeFor(next.chord)} name={label(next.chord)} size={104} /> : <p className="muted">Fim 🎉</p>}
             </div>
           </div>
 
@@ -176,11 +184,11 @@ export function Player({ title, subtitle, timeline, bpm, sync, shapeFor, label =
           <button className="icon-btn" onClick={() => jumpLine(1)} aria-label="Próxima linha">
             <Icon name="next" />
           </button>
-          <button className={`icon-btn ${p.loop ? 'on' : ''}`} onClick={toggleLoop} aria-pressed={!!p.loop} aria-label="Repetir este trecho">
+          <button className={`icon-btn ${p.loop ? 'on' : ''}`} onClick={toggleLoop} aria-pressed={!!p.loop} aria-label="Repetir esta parte">
             <Icon name="loop" />
           </button>
         </div>
-        {p.loop && <p className="loop-info">Repetindo: {sectionRange(Math.max(0, p.lineIndex)).name || 'trecho'}</p>}
+        {p.loop && <p className="loop-info">Repetindo a parte: {sectionRange(Math.max(0, p.lineIndex)).name || 'atual'}</p>}
         <div className="options">
           {mode === 'jogo' ? (
             <div className="chips" role="group" aria-label="Nível">
@@ -192,24 +200,23 @@ export function Player({ title, subtitle, timeline, bpm, sync, shapeFor, label =
             </div>
           ) : (
             <label className="speed">
-              Velocidade
-              <select value={p.speed} onChange={(e) => p.setSpeed(Number(e.target.value))}>
+              <select value={p.speed} onChange={(e) => p.setSpeed(Number(e.target.value))} aria-label="Velocidade">
                 {SPEEDS.map((s) => (
-                  <option key={s} value={s}>
-                    {Math.round(s * 100)}%
+                  <option key={s.v} value={s.v}>
+                    {s.label} ({Math.round(s.v * 100)}%)
                   </option>
                 ))}
               </select>
             </label>
           )}
-          <button className={`chip ${p.metronome ? 'on' : ''}`} onClick={() => p.setMetronome(!p.metronome)} aria-pressed={p.metronome}>
-            Metrônomo
+          <button className={`chip ${p.metronome ? 'on' : ''}`} onClick={() => p.setMetronome(!p.metronome)} aria-pressed={p.metronome} title="Um tic a cada tempo, para você não perder o ritmo">
+            ♩ Tic do ritmo
           </button>
-          <button className={`chip ${p.guide ? 'on' : ''}`} onClick={() => p.setGuide(!p.guide)} aria-pressed={p.guide}>
-            Violão guia
+          <button className={`chip ${p.guide ? 'on' : ''}`} onClick={() => p.setGuide(!p.guide)} aria-pressed={p.guide} title="O app toca o acorde junto com você">
+            🎸 Som do acorde
           </button>
           <button className="chip ghost hide-desktop" onClick={() => setShowControls((v) => !v)}>
-            {showControls ? 'Menos' : 'Mais'}
+            {showControls ? 'Esconder opções' : 'Opções'}
           </button>
         </div>
       </footer>

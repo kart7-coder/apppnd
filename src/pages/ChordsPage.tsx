@@ -5,17 +5,18 @@ import { Icon } from '../components/Icon'
 import { describeShape } from '../music/explain'
 import { strumChord } from '../engine/audio'
 import { useFavorites } from '../lib/userData'
-import { useMethodShapes } from '../content/method'
+import { methodShapes } from '../content/method'
+import { ChordLegend } from '../components/ChordLegend'
 import type { ChordShape } from '../music/types'
 
 const FILTERS = [
   { id: '', label: 'Todos' },
-  { id: 'maior', label: 'Maiores' },
-  { id: 'menor', label: 'Menores' },
-  { id: 'setima', label: 'Com 7ª' },
-  { id: 'outros', label: '9ª, sus, inversões' },
+  { id: 'maior', label: 'Maiores (som alegre)' },
+  { id: 'menor', label: 'Menores (som triste)' },
+  { id: 'setima', label: 'Com 7 (som suave)' },
+  { id: 'outros', label: 'Especiais' },
   { id: 'metodo', label: 'Do Método' },
-  { id: 'fav', label: '♥ Favoritos' },
+  { id: 'fav', label: '♥ Salvos' },
 ]
 
 function kind(name: string): string {
@@ -31,11 +32,10 @@ export function ChordsPage() {
   const [filter, setFilter] = useState('')
   const [open, setOpen] = useState<string | null>(null)
   const favs = useFavorites('chord')
-  const methodShapes = useMethodShapes()
 
   const names = useMemo(() => {
     const isMethod = (s: ChordShape) => s.source.startsWith('Método')
-    const pool = [...allShapes(), ...methodShapes]
+    const pool = [...allShapes(), ...methodShapes()]
     const out: string[] = []
     for (const s of pool) {
       if (out.includes(s.name)) continue
@@ -46,20 +46,24 @@ export function ChordsPage() {
       out.push(s.name)
     }
     return out
-  }, [q, filter, favs, methodShapes])
+  }, [q, filter, favs])
 
   const variations = (name: string) => {
     const list = shapesFor(name)
-    for (const s of methodShapes) if (s.name === name && !list.some((x) => x.frets.join() === s.frets.join())) list.push(s)
+    for (const s of methodShapes()) if (s.name === name && !list.some((x) => x.frets.join() === s.frets.join())) list.push(s)
     return list.filter((s, i, arr) => arr.findIndex((x) => x.frets.join() === s.frets.join()) === i)
   }
 
   return (
     <div className="page">
-      <h1>Dicionário de acordes</h1>
+      <header className="page-head">
+        <span className="eyebrow">Dicionário</span>
+        <h1>Onde colocar cada dedo</h1>
+        <p className="lead">Procure pelo nome do acorde (as letras que aparecem em cima da letra da música) e toque para ouvir.</p>
+      </header>
       <div className="search">
         <Icon name="search" />
-        <input placeholder="Ex.: F#m, D/F#, Am7" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar acorde" />
+        <input placeholder="Digite o acorde. Ex.: Am, G, D/F#" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar acorde" />
       </div>
       <div className="chips scroll" role="group" aria-label="Tipo">
         {FILTERS.map((f) => (
@@ -69,11 +73,14 @@ export function ChordsPage() {
         ))}
       </div>
 
+      {!open && <ChordLegend />}
+
       {open && (
-        <section className="chord-detail" aria-label={`Acorde ${open}`}>
-          <header className="row between">
+        <section className="card chord-detail" aria-label={`Acorde ${open}`}>
+          <header className="chord-detail-head">
             <h2>{open}</h2>
-            <div className="row gap">
+            <p className="muted small">{variations(open).length > 1 ? `${variations(open).length} jeitos de tocar. Arraste para o lado para ver todos.` : 'Toque no desenho para ouvir.'}</p>
+            <div className="actions">
               <button className={`icon-btn ${favs.isFav(open) ? 'on' : ''}`} onClick={() => favs.toggle(open)} aria-label="Favoritar">
                 <Icon name="heart" />
               </button>
@@ -94,7 +101,7 @@ export function ChordsPage() {
                   ))}
                   {s.note && <li className="warn">{s.note}</li>}
                 </ul>
-                <p className="muted small">{s.source}</p>
+
               </div>
             ))}
           </div>

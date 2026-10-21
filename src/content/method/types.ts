@@ -35,6 +35,3 @@ export const TONE_LIST = [
   { id: 'la', key: 'A', name: 'Lá' },
   { id: 'si', key: 'B', name: 'Si' },
 ] as const
-
-export const FREE_TONE = 'do'
-export const METHOD_PRODUCT = 'metodo_acordes'
