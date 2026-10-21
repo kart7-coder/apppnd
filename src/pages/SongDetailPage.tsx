@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { getSong, songChords, songShape, songTimeline, DIFFICULTY_LABEL, CATEGORY_LABEL } from '../content'
-import { Hand3D } from '../components/Hand3D'
+import { HandView } from '../components/HandView'
 import { ChordInfo } from '../components/ChordInfo'
 import { Icon } from '../components/Icon'
 import { useAuth } from '../lib/auth'
@@ -81,7 +81,7 @@ export function SongDetailPage() {
           ))}
         </div>
         <div className="hand-stage">
-          <Hand3D shape={shownShape} aspect={1.8} />
+          <HandView shape={shownShape} hand={false} width={620} className="neck-view" />
         </div>
         <ChordInfo shape={shownShape} name={shown} />
       </section>

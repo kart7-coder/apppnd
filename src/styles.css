@@ -2207,3 +2207,8 @@ details.howto summary::-webkit-details-marker {
   font: 700 11px var(--font-body);
   color: var(--accent-2);
 }
+.neck-view {
+  display: block;
+  width: 100%;
+  height: auto;
+}

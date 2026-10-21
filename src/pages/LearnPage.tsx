@@ -4,7 +4,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { getSong, songChords, songShape, songTimeline } from '../content'
 import { ChordDiagram } from '../components/ChordDiagram'
 import { ChordLegend } from '../components/ChordLegend'
-import { Hand3D } from '../components/Hand3D'
+import { HandView } from '../components/HandView'
 import { ChordInfo } from '../components/ChordInfo'
 import { Icon } from '../components/Icon'
 import { describeChange } from '../music/explain'
@@ -83,7 +83,7 @@ export function LearnPage() {
               <h1>{step.chord}</h1>
               <div className="learn-chord">
                 <div className="hand-stage">
-                  <Hand3D shape={shape} aspect={1.8} />
+                  <HandView shape={shape} hand={false} width={620} className="neck-view" />
                 </div>
                 <ChordInfo shape={shape} name={step.chord} />
                 {shape?.note && <p className="small warn">{shape.note}</p>}
@@ -165,7 +165,7 @@ function ChangeAnimation({ from, to, a, b }: { from: string; to: string; a?: Cho
         <span className={`chip ${onB ? 'on' : ''}`}>{to}</span>
       </div>
       <div className="hand-stage">
-        <Hand3D shape={onB ? b : a} aspect={1.8} />
+        <HandView shape={onB ? b : a} hand={false} width={620} className="neck-view" />
       </div>
     </div>
   )
