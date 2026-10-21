@@ -1,5 +1,8 @@
 import type { ChordShape } from '../music/types'
 
+/** Uma cor por dedo (a mesma do desenho da mão). */
+export const FINGER_COLORS = ['#ff8a2b', '#ff8a2b', '#2fe0c4', '#a18bff', '#ff5c8a']
+
 interface Props {
   shape?: ChordShape
   name?: string
@@ -94,7 +97,7 @@ export function ChordDiagram({ shape, name, size = 140, showName = true, classNa
         const y = fy(rel(b.fret) - 0.5)
         return (
           <g key={k}>
-            <rect x={x1 - r} y={y - r} width={x2 - x1 + 2 * r} height={2 * r} rx={r} className="cd-barre" />
+            <rect x={x1 - r} y={y - r} width={x2 - x1 + 2 * r} height={2 * r} rx={r} className="cd-barre" style={{ fill: FINGER_COLORS[b.finger] }} />
             <text x={(x1 + x2) / 2} y={y + r * 0.42} textAnchor="middle" className="cd-finger" fontSize={r * 1.2}>
               {b.finger}
             </text>
@@ -109,7 +112,7 @@ export function ChordDiagram({ shape, name, size = 140, showName = true, classNa
         const cy = fy(rel(f) - 0.5)
         return (
           <g key={i}>
-            <circle cx={sx(i)} cy={cy} r={r} className={shape.rootString === 6 - i ? 'cd-dot cd-root' : 'cd-dot'} />
+            <circle cx={sx(i)} cy={cy} r={r} className="cd-dot" style={{ fill: FINGER_COLORS[finger] }} />
             {finger > 0 && (
               <text x={sx(i)} y={cy + r * 0.42} textAnchor="middle" className="cd-finger" fontSize={r * 1.2}>
                 {finger}

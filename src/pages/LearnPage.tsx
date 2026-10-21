@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { getSong, songChords, songShape, songTimeline } from '../content'
 import { ChordDiagram } from '../components/ChordDiagram'
 import { ChordLegend } from '../components/ChordLegend'
+import { HandView, FingerLegend } from '../components/HandView'
 import { Icon } from '../components/Icon'
 import { describeChange, describeShape } from '../music/explain'
 import { strumChord } from '../engine/audio'
@@ -54,12 +55,11 @@ export function LearnPage() {
           <span className="eyebrow">Aprender do zero</span>
           <h1>{song.title}</h1>
           <p className="lead">
-            Esta música usa <b>{chords.length} acordes</b>. Acorde é o jeito de posicionar os dedos para tocar várias cordas juntas. Você vai aprender um por vez, depois
-            treinar a troca entre eles e, no fim, tocar a música inteira.
+            São <b>{chords.length} acordes</b>. Você aprende um por vez, treina as trocas e depois toca a música.
           </p>
-          <div className="chord-row">
+          <div className="chord-row wrap">
             {chords.map((c) => (
-              <ChordDiagram key={c} shape={songShape(song, c)} name={c} size={96} />
+              <ChordDiagram key={c} shape={songShape(song, c)} name={c} size={chords.length <= 3 ? 96 : 80} />
             ))}
           </div>
           <ChordLegend />
@@ -80,7 +80,8 @@ export function LearnPage() {
               </span>
               <h1>{step.chord}</h1>
               <div className="learn-chord">
-                <ChordDiagram shape={shape} name={step.chord} size={200} />
+                <HandView shape={shape} width={360} className="hand-big" />
+                <FingerLegend />
                 <ul className="instructions">
                   {shape ? describeShape(shape).map((t) => <li key={t}>{t}</li>) : <li>Desenho ainda não cadastrado.</li>}
                   {shape?.note && <li className="warn">{shape.note}</li>}
@@ -107,10 +108,16 @@ export function LearnPage() {
                 {step.from} → {step.to}
               </h1>
               <p className="lead">Na música, você vai pular de um para o outro. Treine até conseguir sem olhar muito para a mão.</p>
-              <div className="change-pair">
-                <ChordDiagram shape={a} name={step.from} size={130} />
-                <span className="arrow">→</span>
-                <ChordDiagram shape={b} name={step.to} size={130} />
+              <div className="change-hands">
+                <p className="small muted">
+                  De <b>{step.from}</b>
+                </p>
+                <HandView shape={a} width={320} className="hand-big" />
+                <span className="arrow">↓</span>
+                <p className="small muted">
+                  Para <b>{step.to}</b>
+                </p>
+                <HandView shape={b} width={320} className="hand-big" />
               </div>
               <ul className="instructions">{a && b && describeChange(a, b).map((t) => <li key={t}>{t}</li>)}</ul>
               <p />
@@ -128,13 +135,13 @@ export function LearnPage() {
         <section className="card learn-card">
           <span className="eyebrow">Você conseguiu 🎉</span>
           <h1>Agora é tocar a música</h1>
-          <p className="lead">Comece no “Treinar devagar”. Quando ficar fácil, aumente a velocidade até chegar em 100%.</p>
+          <p className="lead">Comece devagar. Quando ficar fácil, aumente a velocidade nos ajustes do player.</p>
           <div className="cta-col">
             <Link className="btn btn-primary" to={`/tocar/${song.id}?modo=pratica`}>
-              Treinar devagar
+              Tocar agora
             </Link>
             <Link className="btn" to={`/tocar/${song.id}?modo=jogo`}>
-              Tocar junto
+              Modo desafio
             </Link>
           </div>
         </section>

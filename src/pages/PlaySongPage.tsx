@@ -22,7 +22,7 @@ export function PlaySongPage() {
   return (
     <Player
       title={song.title}
-      subtitle={mode === 'pratica' ? 'Treinar devagar' : 'Tocar junto'}
+      subtitle={mode === 'pratica' ? undefined : 'Modo desafio'}
       timeline={songTimeline(song)}
       bpm={song.bpm}
       sync={song.sync}
