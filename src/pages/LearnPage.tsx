@@ -1,11 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import type { ChordShape } from '../music/types'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { getSong, songChords, songShape, songTimeline } from '../content'
 import { ChordDiagram } from '../components/ChordDiagram'
 import { ChordLegend } from '../components/ChordLegend'
-import { HandView, HandIcon, FingerLegend } from '../components/HandView'
+import { Hand3D } from '../components/Hand3D'
+import { ChordInfo } from '../components/ChordInfo'
 import { Icon } from '../components/Icon'
-import { describeChange, describeShape } from '../music/explain'
+import { describeChange } from '../music/explain'
 import { strumChord } from '../engine/audio'
 
 type Step = { kind: 'intro' } | { kind: 'chord'; chord: string } | { kind: 'change'; from: string; to: string } | { kind: 'done' }
@@ -80,15 +82,11 @@ export function LearnPage() {
               </span>
               <h1>{step.chord}</h1>
               <div className="learn-chord">
-                <div className="hand-pair">
-                  <HandIcon size={80} active={shape ? [...new Set(shape.fingers.filter((f) => f > 0))] : []} />
-                  <HandView shape={shape} width={360} className="hand-big" />
+                <div className="hand-stage">
+                  <Hand3D shape={shape} aspect={1.8} />
                 </div>
-                <FingerLegend />
-                <ul className="instructions">
-                  {shape ? describeShape(shape).map((t) => <li key={t}>{t}</li>) : <li>Desenho ainda não cadastrado.</li>}
-                  {shape?.note && <li className="warn">{shape.note}</li>}
-                </ul>
+                <ChordInfo shape={shape} name={step.chord} />
+                {shape?.note && <p className="small warn">{shape.note}</p>}
               </div>
               {shape && (
                 <button className="btn" onClick={() => strumChord(shape)}>
@@ -111,17 +109,7 @@ export function LearnPage() {
                 {step.from} → {step.to}
               </h1>
               <p className="lead">Na música, você vai pular de um para o outro. Treine até conseguir sem olhar muito para a mão.</p>
-              <div className="change-hands">
-                <p className="small muted">
-                  De <b>{step.from}</b>
-                </p>
-                <HandView shape={a} width={320} className="hand-big" />
-                <span className="arrow">↓</span>
-                <p className="small muted">
-                  Para <b>{step.to}</b>
-                </p>
-                <HandView shape={b} width={320} className="hand-big" />
-              </div>
+              <ChangeAnimation from={step.from} to={step.to} a={a} b={b} />
               <ul className="instructions">{a && b && describeChange(a, b).map((t) => <li key={t}>{t}</li>)}</ul>
               <p />
               <Link
@@ -157,6 +145,27 @@ export function LearnPage() {
         <button className="btn btn-primary" disabled={i === steps.length - 1} onClick={() => setI(i + 1)}>
           {i === 0 ? 'Começar' : 'Próximo'}
         </button>
+      </div>
+    </div>
+  )
+}
+
+/** Mostra a mão indo e voltando entre os dois acordes. */
+function ChangeAnimation({ from, to, a, b }: { from: string; to: string; a?: ChordShape; b?: ChordShape }) {
+  const [onB, setOnB] = useState(false)
+  useEffect(() => {
+    const id = setInterval(() => setOnB((v) => !v), 1600)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <div className="change-hands">
+      <div className="chips">
+        <span className={`chip ${!onB ? 'on' : ''}`}>{from}</span>
+        <span className="arrow">⇄</span>
+        <span className={`chip ${onB ? 'on' : ''}`}>{to}</span>
+      </div>
+      <div className="hand-stage">
+        <Hand3D shape={onB ? b : a} aspect={1.8} />
       </div>
     </div>
   )

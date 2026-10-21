@@ -75,3 +75,8 @@ src/components/ Player, Highway (canvas), ChordDiagram (SVG)
 src/content/    músicas e Método (7 tons)
 supabase/       schema.sql (tabelas + RLS)
 ```
+
+## Créditos (código aberto)
+- Mão 3D articulada: [WebXR Input Profiles](https://github.com/immersive-web/webxr-input-profiles) (`public/models/left-hand.glb`, MIT, © Amazon)
+- Motor 3D: [three.js](https://github.com/mrdoob/three.js) (MIT)
+- Afinador: [pitchy](https://github.com/ianprime0509/pitchy) (MIT)

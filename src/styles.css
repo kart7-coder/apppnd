@@ -1264,8 +1264,8 @@ select.chip {
 }
 .now-hand {
   width: 100%;
-  max-width: 330px;
-  height: auto;
+  max-width: 420px;
+  border-radius: 14px;
 }
 .lyrics {
   background: var(--glass);
@@ -1366,7 +1366,7 @@ select.chip {
 /* telas baixas: compacta */
 @media (max-height: 760px) {
   .now-hand {
-    max-width: 270px;
+    max-width: 340px;
   }
   .now-name {
     font-size: 1.6rem;
@@ -1377,7 +1377,7 @@ select.chip {
 }
 @media (max-height: 640px) {
   .now-hand {
-    max-width: 220px;
+    max-width: 280px;
   }
 }
 /* ajustes (folha que sobe) */
@@ -2057,4 +2057,153 @@ details.howto summary::-webkit-details-marker {
 }
 .learn-chord .finger-legend {
   margin-bottom: 4px;
+}
+/* ---------- cartão de estudo do acorde ---------- */
+.chord-info {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 10px;
+  max-width: 620px;
+  margin: 12px auto 0;
+}
+.ci-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 8px 8px;
+}
+.ci-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+.ci-name {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1;
+}
+.ci-quality {
+  color: #a99cff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.ci-list {
+  display: grid;
+  gap: 10px;
+  align-content: center;
+  text-align: left;
+  padding: 14px 12px;
+}
+.ci-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ci-row i {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-style: normal;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: #14100c;
+}
+.ci-row b {
+  display: block;
+  font-size: 0.9rem;
+}
+.ci-row small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+.ci-open {
+  border: 3px solid var(--ok);
+  background: none !important;
+}
+.ci-mute {
+  color: var(--danger) !important;
+  font-size: 1.3rem;
+}
+.hand-stage {
+  border-radius: 22px;
+  overflow: hidden;
+  background: radial-gradient(400px 200px at 50% 0%, rgba(80, 100, 200, 0.18), transparent 70%), #0b0f1f;
+  border: 1px solid var(--line);
+  max-width: 620px;
+  margin: 0 auto;
+}
+.hand-stage svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* ---------- mão 3D ---------- */
+.hand3d {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.hand3d canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.hand3d-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.hand3d-loading svg {
+  width: 100%;
+  height: auto;
+}
+.hand3d-marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hand3d-marks span {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+.hm-tip {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: 700 12px var(--font-display);
+  color: #14100c;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  transition: left 0.3s ease, top 0.3s ease;
+}
+.hm-str {
+  font: 600 11px var(--font-body);
+  color: #a9a2b8;
+}
+.hm-str.open {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2.5px solid var(--ok);
+}
+.hm-str.mute {
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 800;
+}
+.hm-pos {
+  left: 50% !important;
+  top: 8px !important;
+  transform: translateX(-50%) !important;
+  font: 700 11px var(--font-body);
+  color: var(--accent-2);
 }

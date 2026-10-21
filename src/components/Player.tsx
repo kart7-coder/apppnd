@@ -3,7 +3,7 @@ import type { ChordShape, SongLine, SyncStatus, Timeline } from '../music/types'
 import { usePlayer } from '../engine/usePlayer'
 import { Highway, LANE_COLORS } from './Highway'
 import { ChordDiagram } from './ChordDiagram'
-import { HandView, HandIcon } from './HandView'
+import { Hand3D } from './Hand3D'
 import { Icon } from './Icon'
 
 export type PlayMode = 'jogo' | 'pratica'
@@ -174,10 +174,7 @@ export function Player({ title, subtitle, timeline, bpm, shapeFor, label = (c) =
             </div>
             <div className="now-visual">
               {view === 'mao' ? (
-                <>
-                  <HandIcon size={58} active={curShape ? [...new Set(curShape.fingers.filter((f) => f > 0))] : []} />
-                  <HandView shape={curShape} width={300} className="now-hand" />
-                </>
+                <Hand3D shape={curShape} className="now-hand" aspect={1.9} />
               ) : (
                 <ChordDiagram shape={curShape} name="" showName={false} size={150} />
               )}
@@ -231,7 +228,7 @@ export function Player({ title, subtitle, timeline, bpm, shapeFor, label = (c) =
             <h3>Mostrar o acorde como</h3>
             <div className="chips" role="group" aria-label="Visualização">
               <button className={`chip ${view === 'mao' ? 'on' : ''}`} onClick={() => setView('mao')}>
-                Braço do violão
+                ✋ Mão no violão
               </button>
               <button className={`chip ${view === 'desenho' ? 'on' : ''}`} onClick={() => setView('desenho')}>
                 ▦ Desenho
