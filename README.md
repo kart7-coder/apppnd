@@ -16,7 +16,7 @@ Exclusivos por tom e login com Supabase.
 | Afinador (pitchy, MIT) | Pronto. Exige https e permissão de microfone |
 | Dicionário de acordes | Pronto (formas padrão + formas do Método) |
 | Método: Tom de Dó (grátis) | Transcrito completo (6 graus + 2 sequências) |
-| Método: outros tons (pago) | Lidos do Supabase (`premium_content`); dados em `content-premium/` |
+| Método: outros tons (pago) | Sequências dos 6 tons transcritas; graus pendentes. Lidos do Supabase (`premium_content`). A fonte fica fora do repositório público |
 | Favoritos, progresso, histórico | Pronto (tabelas no Supabase) |
 | Ofertas + painel admin | Pronto: botão abre o WhatsApp do fluxo "Acordes"; admin libera o acesso em `/admin` |
 

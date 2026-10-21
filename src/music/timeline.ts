@@ -12,26 +12,26 @@ export function buildTimeline(song: Pick<Song, 'sections' | 'beatsPerBar' | 'bar
 
   song.sections.forEach((section, si) => {
     section.lines.forEach((line, li) => {
-      const bars = line.bars ?? song.barsPerLine
+      // Garante pelo menos 1 tempo por acorde.
+      const bars = Math.max(line.bars ?? song.barsPerLine, Math.ceil(line.chords.length / bpb))
       const lineBeats = bars * bpb
       lines.push({ beat, durationBeats: lineBeats, sectionIndex: si, lineIndex: li, sectionName: section.name, line })
 
       if (line.chords.length) {
         const instrumental = !line.lyric.trim()
         const width = Math.max(line.lyric.length, ...line.chords.map((c) => c.col + c.chord.length), 1)
-        let prevOffset = -1
-        line.chords.forEach((c, k) => {
-          let offset: number
-          if (instrumental) {
-            // Linha instrumental: divide os compassos igualmente entre os acordes.
-            offset = Math.round((k * lineBeats) / line.chords.length)
-          } else {
-            offset = Math.round(((c.col / width) * lineBeats) / grid) * grid
-          }
-          if (offset <= prevOffset) offset = prevOffset + 1
-          if (offset >= lineBeats) offset = Math.max(prevOffset + 1, lineBeats - 1)
-          prevOffset = offset
-          chords.push({ chord: c.chord, beat: beat + offset, durationBeats: 0, sectionIndex: si, lineIndex: li })
+        const k = line.chords.length
+        let offsets = line.chords.map((c, idx) =>
+          instrumental
+            ? // Linha instrumental: divide os compassos igualmente entre os acordes.
+              Math.round((idx * lineBeats) / k)
+            : Math.round(((c.col / width) * lineBeats) / grid) * grid,
+        )
+        for (let idx = 1; idx < k; idx++) if (offsets[idx] <= offsets[idx - 1]) offsets[idx] = offsets[idx - 1] + 1
+        // Acordes demais no fim da linha: espalha por igual para nenhum cair fora da linha.
+        if (offsets[k - 1] >= lineBeats) offsets = line.chords.map((_, idx) => Math.floor((idx * lineBeats) / k))
+        line.chords.forEach((c, idx) => {
+          chords.push({ chord: c.chord, beat: beat + offsets[idx], durationBeats: 0, sectionIndex: si, lineIndex: li })
         })
       }
       beat += lineBeats

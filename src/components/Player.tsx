@@ -240,14 +240,47 @@ export function LyricLine({ line, label, active, current }: { line: SongLine; la
     parts.push({ chord: c.chord, text: line.lyric.slice(start, Math.max(start, end)) || ' ' })
     cursor = end
   })
+  // Agrupa por palavra: cada palavra fica inteira (com seus acordes em cima) e a linha só quebra entre palavras.
+  type Sub = { chord?: string; text: string }
+  const tokens: (Sub[] | string)[] = []
+  let word: Sub[] = []
+  const flush = () => {
+    if (word.length) tokens.push(word)
+    word = []
+  }
+  // Acorde que cai num espaço vai para o início da próxima palavra.
+  let pending: string | undefined
+  for (const pt of parts) {
+    if (pt.chord) pending = pt.chord
+    pt.text.split(/(\s+)/).forEach((piece) => {
+      if (!piece) return
+      if (/^\s+$/.test(piece)) {
+        flush()
+        tokens.push(piece)
+      } else {
+        word.push({ chord: pending, text: piece })
+        pending = undefined
+      }
+    })
+  }
+  if (pending) word.push({ chord: pending, text: '' })
+  flush()
   return (
     <p className={`lyric ${current ? 'current' : ''}`}>
-      {parts.map((pt, i) => (
-        <span key={i} className="seg">
-          {pt.chord && <b className={pt.chord === active && current ? 'active' : ''}>{label(pt.chord)}</b>}
-          <span className="txt">{pt.text}</span>
-        </span>
-      ))}
+      {tokens.map((t, i) =>
+        typeof t === 'string' ? (
+          <span key={i}>{t}</span>
+        ) : (
+          <span key={i} className="word">
+            {t.map((sub, j) => (
+              <span key={j} className={`sub ${sub.chord ? 'has-chord' : ''}`}>
+                <b className={sub.chord && sub.chord === active && current ? 'active' : ''}>{sub.chord ? label(sub.chord) : ''}</b>
+                <span>{sub.text}</span>
+              </span>
+            ))}
+          </span>
+        ),
+      )}
     </p>
   )
 }

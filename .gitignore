@@ -6,3 +6,4 @@ dist
 # o SQL gerado é entregue à parte e rodado direto no Supabase.
 content-premium/
 supabase/seed_premium.sql
+entrega/

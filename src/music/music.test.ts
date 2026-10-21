@@ -3,6 +3,7 @@ import { buildTimeline, indexAt, loopTimeline } from './timeline'
 import { transposeChord, freqToNote } from './theory'
 import { allShapes, bestShape } from './chordDb'
 import { HARPA_SONGS } from '../content/songs/harpa'
+import { ALL_SONGS } from '../content'
 import { arrangedSections } from '../content/defineSong'
 
 describe('cifra', () => {
@@ -80,9 +81,10 @@ describe('conteúdo', () => {
       })
     }
   })
-  it('todos os hinos têm diagramas para todos os acordes e linha do tempo válida', () => {
+  it('todas as músicas têm diagramas para todos os acordes e linha do tempo válida', () => {
     expect(HARPA_SONGS).toHaveLength(10)
-    for (const song of HARPA_SONGS) {
+    expect(new Set(ALL_SONGS.map((s) => s.id)).size).toBe(ALL_SONGS.length)
+    for (const song of ALL_SONGS) {
       const secs = arrangedSections(song)
       for (const c of chordsUsed(secs)) expect(bestShape(c, song.shapes?.[c]), `${song.id}: ${c}`).toBeTruthy()
       const t = buildTimeline({ ...song, sections: secs })

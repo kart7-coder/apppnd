@@ -996,39 +996,45 @@ select.chip {
   margin: 4px 0;
   color: var(--muted);
   font-size: 0.95rem;
-  line-height: 1.1;
-  display: flex;
-  flex-wrap: wrap;
+  line-height: 1.25;
+  white-space: pre-wrap;
 }
 .lyric.current {
   color: var(--text);
   font-size: 1.1rem;
   font-weight: 500;
 }
-.lyric .seg {
+.lyric .word {
+  display: inline-flex;
+  align-items: flex-end;
+  vertical-align: bottom;
+}
+.lyric .sub {
   display: inline-flex;
   flex-direction: column;
-  justify-content: flex-end;
 }
-.lyric .seg b {
+.lyric .sub b {
+  min-height: 1.25em;
   font-family: var(--font-display);
   color: var(--accent-2);
   font-size: 0.85em;
-  min-height: 1.2em;
+  white-space: nowrap;
 }
-.lyric .seg b.active {
+.lyric .sub.has-chord b {
+  padding-right: 0.35em;
+}
+.lyric .sub b.active {
   color: #0b1020;
   background: var(--accent);
   border-radius: 6px;
   padding: 0 4px;
   width: fit-content;
 }
-.lyric .txt {
-  white-space: pre-wrap;
-  padding-top: 2px;
-}
 .lyric.instrumental {
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
+  line-height: 1.6;
 }
 .lyric.instrumental b {
   font-family: var(--font-display);
