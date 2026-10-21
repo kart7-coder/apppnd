@@ -1254,8 +1254,13 @@ select.chip {
   color: var(--accent-2);
 }
 .now-visual {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.now-visual .hand-icon {
+  flex: none;
 }
 .now-hand {
   width: 100%;
@@ -2017,9 +2022,24 @@ details.howto summary::-webkit-details-marker {
   padding: 14px 10px;
 }
 .hand-big {
+  flex: 1;
+  min-width: 0;
   width: 100%;
   max-width: 360px;
   height: auto;
+}
+.hand-pair {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+.chord-show {
+  flex-wrap: nowrap !important;
+}
+.hand-icon {
+  flex: none;
 }
 .change-hands {
   display: flex;

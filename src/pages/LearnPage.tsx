@@ -3,7 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { getSong, songChords, songShape, songTimeline } from '../content'
 import { ChordDiagram } from '../components/ChordDiagram'
 import { ChordLegend } from '../components/ChordLegend'
-import { HandView, FingerLegend } from '../components/HandView'
+import { HandView, HandIcon, FingerLegend } from '../components/HandView'
 import { Icon } from '../components/Icon'
 import { describeChange, describeShape } from '../music/explain'
 import { strumChord } from '../engine/audio'
@@ -80,7 +80,10 @@ export function LearnPage() {
               </span>
               <h1>{step.chord}</h1>
               <div className="learn-chord">
-                <HandView shape={shape} width={360} className="hand-big" />
+                <div className="hand-pair">
+                  <HandIcon size={80} active={shape ? [...new Set(shape.fingers.filter((f) => f > 0))] : []} />
+                  <HandView shape={shape} width={360} className="hand-big" />
+                </div>
                 <FingerLegend />
                 <ul className="instructions">
                   {shape ? describeShape(shape).map((t) => <li key={t}>{t}</li>) : <li>Desenho ainda não cadastrado.</li>}

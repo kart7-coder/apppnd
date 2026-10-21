@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { getSong, songChords, songShape, songTimeline, DIFFICULTY_LABEL, CATEGORY_LABEL } from '../content'
-import { ChordDiagram } from '../components/ChordDiagram'
 import { ChordLegend } from '../components/ChordLegend'
-import { HandView } from '../components/HandView'
+import { HandView, HandIcon } from '../components/HandView'
 import { Icon } from '../components/Icon'
 import { useAuth } from '../lib/auth'
 import { logHistory, useFavorites, useProgress } from '../lib/userData'
@@ -82,8 +81,8 @@ export function SongDetailPage() {
           ))}
         </div>
         <div className="card chord-show">
+          <HandIcon size={72} active={shownShape ? [...new Set(shownShape.fingers.filter((f) => f > 0))] : []} />
           <HandView shape={shownShape} width={340} className="hand-big" />
-          <ChordDiagram shape={shownShape} name={shown} size={110} />
         </div>
         <ChordLegend />
       </section>

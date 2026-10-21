@@ -9,17 +9,15 @@ interface Props {
 }
 
 const FINGER_NAMES = ['', 'indicador', 'médio', 'anelar', 'mindinho']
-const SKIN = '#f0c3a0'
-const SKIN_EDGE = '#c98f6b'
 
 /**
  * Braço do violão deitado, como você vê olhando para baixo enquanto toca:
  * a corda mais grossa (6) fica em cima e a cabeça do violão à esquerda.
- * A mão vem por baixo do braço e cada dedo encosta na corda/casa certa.
+ * Cada bolinha colorida é um dedo (mesmas cores do ícone da mão).
  */
 export function HandView({ shape, width = 340, className }: Props) {
   const W = 340
-  const H = 200
+  const H = 132
   const left = 34
   const fretW = 60
   const top = 22
@@ -44,11 +42,7 @@ export function HandView({ shape, width = 340, className }: Props) {
     if (!inBarre && !tips.some((t) => t.finger === finger)) tips.push({ finger, x: fx(fret), y: sy(str) })
   })
 
-  const xs = tips.map((t) => t.x)
-  const palmX = xs.length ? Math.min(Math.max((Math.min(...xs) + Math.max(...xs)) / 2 + 10, 110), 260) : 140
-  const knuckle = (f: number) => ({ x: palmX - 45 + (f - 1) * 30, y: neckBottom + 36 })
 
-  const fingers = [4, 3, 2, 1] // desenha o indicador por último (fica por cima)
 
   return (
     <svg
@@ -57,7 +51,7 @@ export function HandView({ shape, width = 340, className }: Props) {
       height={(width * H) / W}
       className={className}
       role="img"
-      aria-label={`Mão no braço do violão: ${tips.map((t) => `dedo ${t.finger}`).join(', ') || 'cordas soltas'}`}
+      aria-label={`Braço do violão: ${tips.map((t) => `dedo ${t.finger}`).join(', ') || 'cordas soltas'}`}
     >
       {/* braço */}
       <rect x={left} y={top - 10} width={W - left - 6} height={neckBottom - top + 10} rx={6} fill="#3a2717" />
@@ -114,36 +108,46 @@ export function HandView({ shape, width = 340, className }: Props) {
         </text>
       )}
 
-      {/* palma */}
-      <ellipse cx={palmX} cy={H + 8} rx={74} ry={40} fill={SKIN} stroke={SKIN_EDGE} strokeWidth={2} />
-
-      {/* dedos (corpo) */}
-      {fingers.map((f) => {
-        const tip = tips.find((t) => t.finger === f)
-        const k = knuckle(f)
-        if (!tip) {
-          // dedo livre: dobrado, sem encostar no braço
-          return <line key={f} x1={k.x} y1={H} x2={k.x} y2={k.y + 8} stroke={SKIN} strokeWidth={15} strokeLinecap="round" opacity={0.85} />
-        }
-        const bottom = tip.y2 ?? tip.y
-        const d = `M ${k.x} ${H + 4} L ${k.x} ${k.y} Q ${k.x} ${bottom + 24} ${tip.x} ${bottom + 9}`
-        return (
-          <g key={f}>
-            <path d={d} fill="none" stroke={SKIN_EDGE} strokeWidth={16} strokeLinecap="round" />
-            <path d={d} fill="none" stroke={SKIN} strokeWidth={13} strokeLinecap="round" />
-          </g>
-        )
-      })}
       {/* pontas dos dedos: sempre por cima, para nenhuma ficar escondida */}
       {tips.map((tip) => (
         <g key={tip.finger}>
           {tip.y2 != null ? (
-            <rect x={tip.x - 8} y={tip.y - 8} width={16} height={tip.y2 - tip.y + 16} rx={8} fill={FINGER_COLORS[tip.finger]} stroke="#fff" strokeWidth={1.5} />
+            <rect x={tip.x - 10} y={tip.y - 10} width={20} height={tip.y2 - tip.y + 20} rx={10} fill={FINGER_COLORS[tip.finger]} stroke="#fff" strokeWidth={1.5} />
           ) : (
-            <circle cx={tip.x} cy={tip.y} r={8.5} fill={FINGER_COLORS[tip.finger]} stroke="#fff" strokeWidth={1.5} />
+            <circle cx={tip.x} cy={tip.y} r={10} fill={FINGER_COLORS[tip.finger]} stroke="#fff" strokeWidth={1.5} />
           )}
-          <text x={tip.x} y={(tip.y2 != null ? (tip.y + tip.y2) / 2 : tip.y) + 3.8} textAnchor="middle" fontSize={10.5} fontWeight={700} fill="#14100c">
+          <text x={tip.x} y={(tip.y2 != null ? (tip.y + tip.y2) / 2 : tip.y) + 4.2} textAnchor="middle" fontSize={12} fontWeight={700} fill="#14100c">
             {tip.finger}
+          </text>
+        </g>
+      ))}
+    </svg>
+  )
+}
+
+/** Ícone de mão em traço, com a ponta de cada dedo na cor dele. */
+export function HandIcon({ size = 92, active = [] as number[] }: { size?: number; active?: number[] }) {
+  // dedos: [x da base, altura] — indicador a mindinho
+  const F = [
+    { f: 1, x: 30, top: 14 },
+    { f: 2, x: 46, top: 6 },
+    { f: 3, x: 62, top: 10 },
+    { f: 4, x: 77, top: 24 },
+  ]
+  return (
+    <svg viewBox="0 0 100 110" width={size} height={(size * 110) / 100} role="img" aria-label="Dedos: 1 indicador, 2 médio, 3 anelar, 4 mindinho" className="hand-icon">
+      <g fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.55)" strokeWidth={2.4} strokeLinejoin="round">
+        {F.map((d) => (
+          <rect key={d.f} x={d.x - 6.5} y={d.top} width={13} height={64 - d.top} rx={6.5} />
+        ))}
+        <rect x={6} y={50} width={13} height={36} rx={6.5} transform="rotate(-32 12 70)" />
+        <path d="M22 58 H86 V80 C86 96 74 104 58 104 H44 C30 104 22 94 22 80 Z" />
+      </g>
+      {F.map((d) => (
+        <g key={d.f} opacity={active.length && !active.includes(d.f) ? 0.3 : 1}>
+          <circle cx={d.x} cy={d.top + 7} r={7.5} fill={FINGER_COLORS[d.f]} />
+          <text x={d.x} y={d.top + 10.5} textAnchor="middle" fontSize={9.5} fontWeight={700} fill="#14100c">
+            {d.f}
           </text>
         </g>
       ))}
