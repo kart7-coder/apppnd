@@ -1,0 +1,8 @@
+node_modules
+dist
+.env.local
+*.log
+# Conteúdo pago: NÃO publicar (o repositório é público). Fica fora do git;
+# o SQL gerado é entregue à parte e rodado direto no Supabase.
+content-premium/
+supabase/seed_premium.sql
